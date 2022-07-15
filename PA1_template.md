@@ -5,7 +5,8 @@ output:
     keep_md: true
 ---
 
-```{r message=FALSE}
+
+```r
 library(readr)
 library(lubridate)
 library(tidyverse)
@@ -17,12 +18,11 @@ $~$
 
 $~$
 
-```{r}
 
+```r
 activity <- read_csv(unz("activity.zip", "activity.csv"), show_col_types = FALSE)
 
 activity$date <- as.Date(activity$date)
-
 ```
 
 $~$
@@ -31,24 +31,25 @@ $~$
 
 $~$
 
-```{r}
+
+```r
 Total_Steps <- activity %>% 
             group_by(date) %>% 
             drop_na() %>% 
             summarise(steps_per_day = sum(steps))
-    
 ```
 
 
-```{r}
 
+```r
 ggplot(Total_Steps, aes(steps_per_day)) + 
   geom_histogram(bins = 20, fill = "#69b3a2", alpha = 0.8, color = "black")+
   labs(title = " Total Number of Steps per Day",
       x = "Steps per Day") +
   theme_bw()
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
 $~$
 
@@ -56,19 +57,28 @@ $~$
 
 $~$
 
-```{r}
 
+```r
 print(
   mean(Total_Steps$steps_per_day, na.rm = TRUE)
     )
 ```
 
+```
+## [1] 10766.19
+```
+
 $~$
 
-```{r}
+
+```r
 print(
   median(Total_Steps$steps_per_day, na.rm = TRUE)
      )
+```
+
+```
+## [1] 10765
 ```
 
 $~$
@@ -77,25 +87,26 @@ $~$
 
 $~$
 
-```{r}
+
+```r
 Steps_Summary <- activity %>% 
                   group_by(date) %>% 
                   drop_na() %>% 
                   summarise(mean = mean(steps)) 
-
 ```
 
 
-```{r}
 
+```r
 Steps_Summary %>% 
   ggplot(aes(date,mean)) + 
   geom_line(size = 1, color = "grey") +
   geom_point(size = 3, color  = "#69b3a2") +
   labs(title = "Average Number of Steps per Day") +
   theme_bw()
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 $~$
 
@@ -103,33 +114,38 @@ $~$
 
 $~$
 
-```{r}
+
+```r
 Interval_Summary <- activity %>% 
                   group_by(interval) %>% 
                   drop_na() %>% 
                   summarise(mean = mean(steps))  
-
 ```
 
 $~$
 
 #### Interval with the maximum activity 
-```{r}
 
-
+```r
 Interval_Summary_ordered <-arrange(Interval_Summary, desc(mean))
 
 print(
   Interval_Summary_ordered[1, ]
       ) 
-    
+```
+
+```
+## # A tibble: 1 x 2
+##   interval  mean
+##      <dbl> <dbl>
+## 1      835  206.
 ```
 
 $~$
 
 #### Time series plot of the average number of steps taken per interval 
-```{r fig.height=5, fig.width=10}
 
+```r
 Interval_Summary %>% 
   ggplot(aes(interval,mean)) + 
   geom_line(size = 1.2, color = "#00AFBB") +
@@ -140,6 +156,8 @@ Interval_Summary %>%
   theme_bw()
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+
 $~$
 
 ## Imputing missing values
@@ -147,18 +165,22 @@ $~$
 $~$
 
 #### Total number of missing values in the dataset 
-```{r}
 
+```r
 table(is.na(activity))
+```
 
+```
+## 
+## FALSE  TRUE 
+## 50400  2304
 ```
 
 $~$
 
 #### Devise a strategy for filling in all of the missing values in the dataset. 
-```{r}
 
-
+```r
 Interval_Summary <- activity %>% 
                   group_by( interval) %>% 
                   drop_na() %>% 
@@ -174,45 +196,42 @@ Activity_NAs <- activity %>% filter(is.na(steps))
 Activity_NAs <- inner_join(Interval_Summary, Activity_NAs, by = "interval") %>% 
                 select(mean, date, interval) %>% 
                 rename(steps = mean)
-
-
 ```
 
 $~$
 
 #### Create a new dataset that is equal to the original dataset but with the missing data filled in.
-```{r}
 
+```r
 Activity_drop_NAs <- activity %>% drop_na()
 
 
 Activity_Imputed <- rbind(Activity_drop_NAs, Activity_NAs)
-
 ```
 
 $~$
 
 #### total number of steps taken each day after missing values are imputed
-```{r}
+
+```r
 Total_Steps_Imputed <- Activity_Imputed %>% 
             group_by(date) %>% 
             summarise(steps_per_day = sum(steps))
-
-    
 ```
 
 $~$
 
 #### Histogram showing total steps per day after imputing missing values 
-```{r}
 
+```r
 ggplot(Total_Steps_Imputed, aes(steps_per_day)) + 
   geom_histogram(bins = 20, fill = "#69b3a2", alpha = 0.8, color = "black")+
   labs(title = " Total Number of Steps per Day (missing values imputed)", 
        x = "Steps per Day") +
   theme_bw()
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-16-1.png)<!-- -->
 
 $~$
 
@@ -221,23 +240,31 @@ $~$
 $~$
 
 #### Calculate and report the mean total number of steps taken per day
-```{r}
 
+```r
 #  mean total number of steps taken per day
 
 print(
   mean(Total_Steps_Imputed$steps_per_day)
     )
 ```
+
+```
+## [1] 10766.19
+```
  
 $~$ 
 
-```{r}
 
+```r
 #  median total number of steps taken per day
 print(
   median(Total_Steps$steps_per_day)
     ) 
+```
+
+```
+## [1] 10765
 ```
 
 $~$
@@ -251,8 +278,8 @@ $~$
 $~$
 
 #### Create a new factor variable in the dataset with two levels – “weekday” and “weekend” 
-```{r}
 
+```r
 weekday <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 
 weekend <- c("Saturday", "Sunday")
@@ -265,15 +292,20 @@ Activity_Imputed <- Activity_Imputed %>% mutate(Day_of_Week = weekdays(date),
 $~$
 
 #### Time series plot of activity pattern per interval averaged across all weekday days or weekend days 
-```{r}
+
+```r
 Activity_Imputed_Summary <-  Activity_Imputed %>% 
                                     group_by(interval, Work_Week) %>% 
                                     summarise(average_steps = mean(steps))
 ```
 
+```
+## `summarise()` has grouped output by 'interval'. You can override using the `.groups` argument.
+```
 
-```{r fig.height=5, fig.width=12}
 
+
+```r
 Activity_Imputed_Summary %>% 
   ggplot(aes(interval, average_steps, groups = Work_Week)) +
   geom_line(size = 1.2, color = "#00AFBB") +
@@ -282,8 +314,9 @@ Activity_Imputed_Summary %>%
        y = "Average Number of Steps ") + 
   facet_wrap(~ Work_Week, ncol = 1)+
   theme_bw()
-
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
 
 
 
